@@ -130,6 +130,18 @@ class Vertica::Connection
     return job.run
   end
   
+  def prepare(sql, param_count = 0, options = {}, &block)
+    statement = Vertica::PreparedStatement.new(self, sql, param_count, options)
+    statement.prepare
+
+    if block_given?
+      yield statement
+      statement.close
+    else
+      return statement
+    end
+  end
+
   protected
   
   def file_copy_handler(input_file, output)
@@ -182,6 +194,7 @@ class Vertica::Connection
 end
 
 require 'vertica/query'
+require 'vertica/prepared_statement'
 require 'vertica/column'
 require 'vertica/result'
 require 'vertica/portal'
